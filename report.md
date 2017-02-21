@@ -35,9 +35,9 @@ Assume we have the above image captured by our car in a highway.
   1. **Grayscale**
   As you see lanes are either white or yellow on the streets. So we need to identify both.First we need to convert our image shape from a tensor (A, B, C) to a Matrix (A, B) to be able to only deal with raw pixles. In this case yellow and white considered both the same. In order to achieve that we can use *OpenCV GrayScale* method.
   
-  ``` python
-  def grayscale(img):
-    return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+  ```python
+    def grayscale(img):
+      return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   ```
   ![alt img](./out/grayscale_image.png)
   
@@ -46,7 +46,7 @@ Assume we have the above image captured by our car in a highway.
   2. **Pixle Filtering**
   As an enhancement here we also can identify only pixles with white or yellow color which helps out to filter out more pixles. 
   
-  ``` python
+  ```python
     def select_white_yellow(image):
       converted = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
       # white color mask
@@ -60,17 +60,29 @@ Assume we have the above image captured by our car in a highway.
       # combine the mask
       mask = cv2.bitwise_or(white_mask, yellow_mask)
       return cv2.bitwise_and(image, image, mask = mask)
-      ![alt img](./out/color_select.png)
-    ```
+  ```
+  
+  ![alt img](./out/color_select.png)
     
-    3.  **Gaussian Noise**
+  3.  **Gaussian Blur**
    Now we need to apply a smoothing function to reduce image noise and detail. This also helps to smooth out edges in the image before applying Canny edge detection algorithm which is the next step.
     
-    ``` python
+    ```python
       def gaussian_noise(img, kernel_size):
         return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
     ```
     ![alt img](./test_images/smooth_image.png)
+    
+    
+  4. **Canny Edge Detection**
+    This approach using differential values of the image to detect boaundries which are between three regions. Those regions are identifies by high and low thresholds which we feed to the function.
+    ```python
+    def canny(img, low_threshold, high_threshold):
+      return cv2.Canny(img, low_threshold, high_threshold)
+    ```
+     ![alt img](./test_images/canny.png)
+     
+     5. 
 
 ### Reflection
 
