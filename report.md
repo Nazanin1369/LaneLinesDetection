@@ -127,6 +127,7 @@ Assume we have the above image captured by our car in a highway.
   I did tweak this function a little bit for applying some more filtering on lines and adjusting line's slopes. I am going go cover those in a the sext section.
   
   6~. Adjustements to improve lane detection
+  
     a. Filtering slopes
     Here I have applied some enhancements to draw lines more efficiently. When I first applied hough tranform I  got so many other lines wich their slopes were different than the lane line and I have to filter those out. 
     Following function looks through all the hough transformed lines and filter those out based on the defined min and max slopes. This will help specifically with curved lines which slope changes are significant.
@@ -147,6 +148,19 @@ Assume we have the above image captured by our car in a highway.
 
     ```
     b. Linear Regression
+    Linear Regression comes handy when identifying curved lines. It uses standard error of the estimate is a measure of the accuracy of predictions. Recall that the regression line is the line that minimizes the sum of squared deviations of prediction (also called the sum of squares error). The standard error of the estimate is closely related to this quantity and is defined below:
+    
+    ![alt image](http://onlinestatbook.com/lms/regression/graphics/se_est.gif)
+    
+    where σest is the standard error of the estimate, Y is an actual score, Y' is a predicted score, and N is the number of pairs of scores. The numerator is the sum of squared differences between the actual scores and the predicted scores.
+    
+    In summary if we have a line, y = mx + c, through some noisy data-points, By examining the coefficients, we see that the line should have a gradient of roughly g1 and cut the y-axis at, more or less, y0. We can rewrite the line equation as y = Ap, where A = [[x 1]] and p = [[m], [c]]. Now use lstsq to solve for p. 
+    In a simpler language linear regression can draw a best line regarding a given number of points so that the Root Mean Squared Error is minimized.
+    
+    ![alt image](https://docs.scipy.org/doc/numpy/_images/numpy-linalg-lstsq-1.png)
+
+    
+    As you must realized linear regression can do the same identifying the best line amoung all the hough lines and efficenizing the slope by redusing RMSE.
     
     ```python
     def lines_linreg(lines_array):
