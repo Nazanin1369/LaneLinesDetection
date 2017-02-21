@@ -71,7 +71,7 @@ Assume we have the above image captured by our car in a highway.
       def gaussian_noise(img, kernel_size):
         return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
     ```
-    ![alt img](./test_images/smooth_image.png)
+    ![alt img](./out/smooth_image.png)
     
     
   4. **Canny Edge Detection**
@@ -80,9 +80,101 @@ Assume we have the above image captured by our car in a highway.
     def canny(img, low_threshold, high_threshold):
       return cv2.Canny(img, low_threshold, high_threshold)
     ```
-     ![alt img](./test_images/canny.png)
+     ![alt img](./out/canny.png)
      
-     5. 
+     Here to maximize the edges I did dialated the image too.
+     
+     ![alt img](./out/dialate.png)
+     
+  5. **Masked Image**
+  Now we have to narrow down our analysis to a section of image that lane lines are. In order to to do apply a trapezoidal mask over its edges. Here as an enhancement I applied two different masks one for right and one for left lane to have better detection specially on turns and curvy lanes.
+  
+  ```python
+    def region_of_interest(img, vertices):
+      #defining a blank mask to start with
+      mask = np.zeros_like(img)   
+
+      #defining a 3 channel or 1 channel color to fill the mask with depending on the input image
+      if len(img.shape) > 2:
+          channel_count = img.shape[2]  # i.e. 3 or 4 depending on your image
+          ignore_mask_color = (255,) * channel_count
+      else:
+          ignore_mask_color = 255
+
+      #filling pixels inside the polygon defined by "vertices" with the fill color    
+      cv2.fillPoly(mask, vertices, ignore_mask_color)
+
+      #returning the image only where mask pixels are nonzero
+      masked_image = cv2.bitwise_and(img, mask)
+      return masked_image
+  ```
+  ![alt img](./out/regions_left.png)
+  ![alt img](./out/regions_right.png)
+  
+  
+  6. **Hough Transform**
+  So far we did a great job identifying lane lines in the picture, now we need to draw them to show the machine where the lanes are. In order to draw lines in images or video frames we use a technique called *Hough Transform* which is basically determines for each given pixel in the picture if there is a straight line passing through the pixel. The algorithm uses 5 parameters which are rho, theta, min_votes, min_line_length and max_line_gap. You can read more about Hough transform algorithm [here](http://homepages.inf.ed.ac.uk/rbf/HIPR2/hough.htm).
+  
+  ```python
+    lines = cv2.HoughLinesP(img, rho, theta, threshold, np.array([]), minLineLength=min_line_len,
+                            maxLineGap=max_line_gap)
+    #line_img = np.zeros(img.shape, dtype=np.uint8)
+    #draw_lines(line_img, lines)
+    #return line_img
+    return lines
+  ```
+  We draw the lines separately for left and right side.
+  I did tweak this function a little bit for applying some more filtering on lines and adjusting line's slopes. I am going go cover those in a the sext section.
+  
+  6~. Adjustements to improve lane detection
+    a. Filtering slopes
+    Here I have applied some enhancements to draw lines more efficiently. When I first applied hough tranform I  got so many other lines wich their slopes were different than the lane line and I have to filter those out. 
+    Following function looks through all the hough transformed lines and filter those out based on the defined min and max slopes. This will help specifically with curved lines which slope changes are significant.
+    
+    ```python
+      def slope_filter(lines_array, positive, min_slope, max_slope):
+        slopes = np.apply_along_axis(lambda row: (row[3] - row[1]) / (row[2] - row[0]), 2, lines_array)
+        if positive:
+            slopes[slopes > max_slope] = 0
+            slopes[slopes < min_slope] = 0
+            lines_array = np.array(lines_array[np.where(slopes > 0)])
+        else:
+            slopes[slopes < -max_slope] = 0
+            slopes[slopes > -min_slope] = 0
+            lines_array = np.array(lines_array[np.where(slopes < 0)])
+
+        return lines_array
+
+    ```
+    b. Linear Regression
+    
+    ```python
+    def lines_linreg(lines_array):
+      ### Select the 0th and 2nd index which will provide the xval and reshape to extract x values
+      x = np.reshape(lines_array[:, [0, 2]], (1, len(lines_array) * 2))[0]
+      ### Select the 1st and 3rd index which will provide the yval and reshape to extract 7 values
+      y = np.reshape(lines_array[:, [1, 3]], (1, len(lines_array) * 2))[0]
+      A = np.vstack([x, np.ones(len(x))]).T
+      m, c = np.linalg.lstsq(A, y)[0]
+      x = np.array(x)
+      y = np.array(x * m + c)
+      return x, y, m, c
+   ```   
+    
+  
+  7. **Weighted Image**
+  In this step we only need to overlay hough image and original image to display lines we call the resulted image weighted image.
+  
+  ```python
+    def weighted_img(img, initial_img, α=0.8, β=1., λ=0.):
+      return cv2.addWeighted(initial_img, α, img, β, λ)
+      
+    color_with_lines = np.zeros(image.shape, dtype=np.uint8)
+    color_with_lines = draw_lines(color_with_lines, lines_left, lines_right, [255, 0, 0], 10)
+    result = weighted_img(color_with_lines, image)   
+  ```
+  
+   ![alt img](./out/result.png)
 
 ### Reflection
 
