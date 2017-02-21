@@ -1,15 +1,15 @@
 #**Finding Lane Lines on the Road** 
 
-Self-driving car needs percieve the world as humans do when they drive. Humans use their eyes to figure out how fast they go, where the lane lines are and where are the turns. Car does not have eyes but self-driving cars can use cameras and other sensors to keep the similar function. So what does cameras are seeing as we drive down the road is not the same as what we perceive. We have to teach the car how to percieve lane lines and turns. Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
+Self-driving car needs perceive the world as humans do when they drive. Humans use their eyes to figure out how fast they go, where the lane lines are and where are the turns. Car does not have eyes but self-driving cars can use cameras and other sensors to keep the similar function. So what does cameras are seeing as we drive down the road is not the same as what we perceive. We have to teach the car how to percieve lane lines and turns. Naturally, one of the first things we would like to do in developing a self-driving car is to automatically detect lane lines using an algorithm.
 
-Here we are using [OpenCV](http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_tutorials.html)_A comprehensive Computer Vision library to understand captured images from the car and translate them to mathematical entities so we can show the car where the lane line is to follow. The algorithm I have chosen has multiple steps for maniplating each frame image in order to reduce or better said eliminate noises as much as possible. Since the car does not need to see the trees or clouds in the sky for detecting lane lines. In addition to reducing noises we try to highlight lane lines as much as possible by highlighting them using some image processing algorithms. 
+Here we are using [OpenCV](http://docs.opencv.org/3.0-beta/doc/py_tutorials/py_tutorials.html)_A comprehensive Computer Vision library to understand captured images from the car and translate them to mathematical entities so we can show the car where the lane line is to follow. The algorithm I have chosen has multiple steps for manipulating each frame image in order to reduce or better said eliminate noises as much as possible. Since the car does not need to see the trees or clouds in the sky for detecting lane lines. In addition to reducing noises we try to highlight lane lines as much as possible by highlighting them using some image processing algorithms. 
 But the question is what features of lane lines do we need to highlight? Well, we can leverage following features to best identify various lane line in the image:
 * color
 * shape
 * orientation
 * position of the image
 
-The line detection algorithm has multiple steps and the most important thing is to tweek all the required parameters well enough to not to loose any valuable pixle in the image. 
+The line detection algorithm has multiple steps and the most important thing is to tweak all the required parameters well enough to not to loose any valuable pixel in the image. 
 
 ## Basics
 
@@ -20,20 +20,21 @@ The first step in detecting lane lines is understanding how images are represent
   >> print(image.shape)
     (342, 548, 3)
 ```
-If you want to know how many pixles this image has you can use **img.size** which returns the number of pixles in the image.
-Each pixle in the image is represented in a 3D space as (R, G, B) values. Each of these values is in range [0-255]. So with this explanation we saw that images are basically **tensors** with different number of rows, columns and elements per each color channel.
+If you want to know how many pixel this image has you can use **img.size** which returns the number of pixels in the image.
+Each pixel in the image is represented in a 3D space as (R, G, B) values. Each of these values is in range [0-255]. So with this explanation we saw that images are basically **tensors** with different number of rows, columns and elements per each color channel.
 
-Understanding of mathematical features of an image and its representation is a great help solving computer vision challanges and understanding image processing algorithms.
+Understanding of mathematical features of an image and its representation is a great help solving computer vision challenges and understanding image processing algorithms.
+Understanding of mathematical features of an image and its representation is a great help solving computer vision challenges and understanding image processing algorithms.
 
 
 ### Lane line detection algorithm
 ![alt img](./test_images/solidWhiteCurve.jpg)
 ![alt img](./test_images/solidYellowCurve.jpg)
-Now let's desribe the used algorithm to detect lane lines step by step.
+Now let's describe the used algorithm to detect lane lines step by step.
 Assume we have the above image captured by our car in a highway. 
 
   1. **Grayscale**
-  As you see lanes are either white or yellow on the streets. So we need to identify both.First we need to convert our image shape from a tensor (A, B, C) to a Matrix (A, B) to be able to only deal with raw pixles. In this case yellow and white considered both the same. In order to achieve that we can use *OpenCV GrayScale* method.
+  As you see lanes are either white or yellow on the streets. So we need to identify both.First we need to convert our image shape from a tensor (A, B, C) to a Matrix (A, B) to be able to only deal with raw pixels. In this case yellow and white considered both the same. In order to achieve that we can use *OpenCV GrayScale* method.
   
   ```python
     def grayscale(img):
@@ -43,8 +44,8 @@ Assume we have the above image captured by our car in a highway.
   
   
   
-  2. **Pixle Filtering**
-  As an enhancement here we also can identify only pixles with white or yellow color which helps out to filter out more pixles. 
+  2. **Pixel Filtering**
+  As an enhancement here we also can identify only pixels with white or yellow color which helps out to filter out more pixels. 
   
   ```python
     def select_white_yellow(image):
@@ -126,10 +127,10 @@ Assume we have the above image captured by our car in a highway.
   We draw the lines separately for left and right side.
   I did tweak this function a little bit for applying some more filtering on lines and adjusting line's slopes. I am going go cover those in a the sext section.
   
-  6~. Adjustements to improve lane detection
+  6~. **Adjustments to improve lane detection**
   
     a. Filtering slopes
-    Here I have applied some enhancements to draw lines more efficiently. When I first applied hough tranform I  got so many other lines wich their slopes were different than the lane line and I have to filter those out. 
+    Here I have applied some enhancements to draw lines more efficiently. When I first applied hough transform I  got so many other lines wich their slopes were different than the lane line and I have to filter those out. 
     Following function looks through all the hough transformed lines and filter those out based on the defined min and max slopes. This will help specifically with curved lines which slope changes are significant.
     
     ```python
@@ -160,7 +161,7 @@ Assume we have the above image captured by our car in a highway.
     ![alt image](https://docs.scipy.org/doc/numpy/_images/numpy-linalg-lstsq-1.png)
 
     
-    As you must realized linear regression can do the same identifying the best line amoung all the hough lines and efficenizing the slope by redusing RMSE.
+    As you must realized linear regression can do the same identifying the best line amoung all the hough lines and efficenizing the slope by reducing RMSE.
     
     ```python
     def lines_linreg(lines_array):
