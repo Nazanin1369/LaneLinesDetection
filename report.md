@@ -31,14 +31,46 @@ Understanding of mathematical features of an image and its representation is a g
 ![alt img](./test_images/solidYellowCurve.jpg)
 Now let's desribe the used algorithm to detect lane lines step by step.
 Assume we have the above image captured by our car in a highway. 
-1. **Grayscale**
+
+  1. **Grayscale**
   As you see lanes are either white or yellow on the streets. So we need to identify both.First we need to convert our image shape from a tensor (A, B, C) to a Matrix (A, B) to be able to only deal with raw pixles. In this case yellow and white considered both the same. In order to achieve that we can use *OpenCV GrayScale* method.
+  
   ``` python
   def grayscale(img):
     return cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
   ```
-
-2. 
+  ![alt img](./out/grayscale_image.png)
+  
+  
+  
+  2. **Pixle Filtering**
+  As an enhancement here we also can identify only pixles with white or yellow color which helps out to filter out more pixles. 
+  
+  ``` python
+    def select_white_yellow(image):
+      converted = cv2.cvtColor(image, cv2.COLOR_RGB2HLS)
+      # white color mask
+      lower = np.uint8([  0, 200,   0])
+      upper = np.uint8([255, 255, 255])
+      white_mask = cv2.inRange(converted, lower, upper)
+      # yellow color mask
+      lower = np.uint8([ 10,   0, 100])
+      upper = np.uint8([ 40, 255, 255])
+      yellow_mask = cv2.inRange(converted, lower, upper)
+      # combine the mask
+      mask = cv2.bitwise_or(white_mask, yellow_mask)
+      return cv2.bitwise_and(image, image, mask = mask)
+      ![alt img](./out/color_select.png)
+    ```
+    
+    3.  **Gaussian Noise**
+   Now we need to apply a smoothing function to reduce image noise and detail. This also helps to smooth out edges in the image before applying Canny edge detection algorithm which is the next step.
+    
+    ``` python
+      def gaussian_noise(img, kernel_size):
+        return cv2.GaussianBlur(img, (kernel_size, kernel_size), 0)
+    ```
+    ![alt img](./test_images/smooth_image.png)
 
 ### Reflection
 
