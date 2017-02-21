@@ -192,12 +192,15 @@ Assume we have the above image captured by our car in a highway.
 
 ### Project shortcomings
 
-One potential shortcoming would be what would happen when ... 
+One potential shortcoming would be what would happen when lane detection is happening on roads with low visibility like driving at night or in rainy days. What if the road does not have any line? like when you drive in desert. 
+
+Also we need more images and videos to try and enhance the algorithm with.
+
+One thing I really was not satisfied with here was not being able for the car to adapt to data and take decisions. This algorithm is like telling the car what to see all the time.
 
 
 
 ### Future Enhancements
 
-A possible improvement would be to ...
-
-Another potential improvement could be to ...
+* use Deep learning to make the car adapt with road. 
+* drawing the whole lane instead of only marking lane lines
